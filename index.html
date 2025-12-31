@@ -103,9 +103,28 @@
 
   <!-- المبيعات -->
   <div id="sales" class="box" style="display:none;">
-    <h3>المبيعات</h3>
-    <p>قريبًا…</p>
-  </div>
+  <h3>🧾 فاتورة بيع</h3>
+
+  <label>الصنف</label>
+  <select id="saleProduct"></select>
+
+  <label>الكمية</label>
+  <input type="number" id="saleQty" value="1" min="1">
+
+  <button class="primary" onclick="addToInvoice()">➕ إضافة للفاتورة</button>
+
+  <hr>
+
+  <div id="invoiceItems"></div>
+
+  <hr>
+
+  <p>الإجمالي: <b id="subTotal">0</b></p>
+  <p id="taxRow" style="display:none;">الضريبة: <b id="taxAmount">0</b></p>
+  <p>الإجمالي النهائي: <b id="grandTotal">0</b></p>
+
+  <button class="primary" onclick="saveInvoice()">💾 حفظ الفاتورة</button>
+</div>
 
   <!-- التقارير -->
   <div id="reports" class="box" style="display:none;">
