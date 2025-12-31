@@ -122,15 +122,20 @@
   <p>الإجمالي: <b id="subTotal">0</b></p>
   <p id="taxRow" style="display:none;">الضريبة: <b id="taxAmount">0</b></p>
   <p>الإجمالي النهائي: <b id="grandTotal">0</b></p>
-
+<button onclick="printInvoice()">🖨️ طباعة الفاتورة</button>
   <button class="primary" onclick="saveInvoice()">💾 حفظ الفاتورة</button>
 </div>
 
   <!-- التقارير -->
   <div id="reports" class="box" style="display:none;">
-    <h3>التقارير</h3>
-    <p>قريبًا…</p>
-  </div>
+  <h3>📊 التقارير</h3>
+
+  <button onclick="showSalesReport()">تقرير المبيعات</button>
+  <button onclick="showProfitReport()">الأرباح والخسائر</button>
+  <button onclick="showStockReport()">تقرير المخزون</button>
+
+  <div id="reportResult"></div>
+</div>
 
   <!-- الإعدادات -->
   <div id="settings" class="box" style="display:none;">
@@ -255,32 +260,99 @@
       taxRow.style.display = 'none';
     }
 
-    grandTotal.innerText = (subtotal + tax).toFixed(2);
-  }
+    grandTotal.innerText = (subtotal + tax).toFixed(
+      <script>
+      <script>
+function printInvoice() {
+  let html = `
+    <h2>فاتورة بيع</h2>
+    <hr>
+  `;
 
-  function saveInvoice() {
-    if (invoice.length === 0) {
-      alert('الفاتورة فارغة');
-      return;
-    }
+  invoice.forEach(i => {
+    html += `<p>${i.name} × ${i.qty} = ${i.total}</p>`;
+  });
 
-    const data = {
-      id: Date.now(),
-      items: invoice,
-      total: grandTotal.innerText,
-      date: new Date().toLocaleString('ar-EG')
-    };
+  html += `
+    <hr>
+    <p>الإجمالي: ${subTotal.innerText}</p>
+    <p>الضريبة: ${settings.taxEnabled ? taxAmount.innerText : 0}</p>
+    <h3>الإجمالي النهائي: ${grandTotal.innerText}</h3>
+  `;
 
-    sales.push(data);
-    localStorage.setItem('sales', JSON.stringify(sales));
+  const w = window.open('', '', 'width=400,height=600');
+  w.document.write(html);
+  w.print();
+}
+</script>
+<script>
+function showSalesReport() {
+  let total = 0;
+  reportResult.innerHTML = '<h4>تقرير المبيعات</h4>';
 
-    invoice = [];
-    renderInvoice();
+  sales.forEach(s => {
+    total += Number(s.total);
+    reportResult.innerHTML += `
+      <div class="box">
+        فاتورة #${s.id}<br>
+        التاريخ: ${s.date}<br>
+        الإجمالي: ${s.total}
+      </div>
+    `;
+  });
 
-    alert('تم حفظ الفاتورة ✅');
-  }
+  reportResult.innerHTML += `<h3>إجمالي المبيعات: ${total}</h3>`;
+}
 
-  loadProductsToSales();
+function showProfitReport() {
+  let profit = 0;
+  reportResult.innerHTML = '<h4>الأرباح والخسائر</h4>';
+
+  sales.forEach(s => {
+    s.items.forEach(i => {
+      profit += i.total;
+    });
+  });
+
+  reportResult.innerHTML += `<h3>الربح التقريبي: ${profit}</h3>`;
+}
+
+function showStockReport() {
+  reportResult.innerHTML = '<h4>تقرير المخزون</h4>';
+
+  products.forEach(p => {
+    reportResult.innerHTML += `
+      <div class="box">
+        ${p.name}<br>
+        الكمية المتبقية: ${p.qty}
+      </div>
+    `;
+  });
+}
+</script>
+<script>
+function printInvoice() {
+  let html = `
+    <h2>فاتورة بيع</h2>
+    <hr>
+  `;
+
+  invoice.forEach(i => {
+    html += `<p>${i.name} × ${i.qty} = ${i.total}</p>`;
+  });
+
+  html += `
+    <hr>
+    <p>الإجمالي: ${subTotal.innerText}</p>
+    <p>الضريبة: ${settings.taxEnabled ? taxAmount.innerText : 0}</p>
+    <h3>الإجمالي النهائي: ${grandTotal.innerText}</h3>
+  `;
+
+  const w = window.open('', '', 'width=400,height=600');
+  w.document.write(html);
+  w.print();
+}
+</script>
 </script>
 </body>
 </html>
