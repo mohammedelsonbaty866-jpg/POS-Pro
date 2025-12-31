@@ -6,11 +6,11 @@
 <style>
 body{font-family:Tahoma;background:#f4f6f8}
 .box{background:#fff;margin:15px;padding:15px}
-button{padding:6px}
+button{padding:5px}
 </style>
 </head>
-
 <body>
+
 <h2>لوحة تحكم Pos Pro</h2>
 <div id="users"></div>
 
@@ -25,16 +25,15 @@ firebase.initializeApp({
 });
 
 const db=firebase.firestore();
-
 db.collection("users").onSnapshot(s=>{
  users.innerHTML="";
  s.forEach(d=>{
   const u=d.data();
   users.innerHTML+=`
-  <div class="box">
-   ${u.email} - ${u.subscription}
-   <button onclick="activate('${d.id}')">تفعيل</button>
-  </div>`;
+   <div class="box">
+    ${u.email} - ${u.subscription}
+    <button onclick="activate('${d.id}')">تفعيل</button>
+   </div>`;
  });
 });
 
@@ -42,5 +41,6 @@ function activate(id){
  db.collection("users").doc(id).update({subscription:"active"});
 }
 </script>
+
 </body>
 </html>
