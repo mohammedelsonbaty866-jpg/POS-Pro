@@ -76,6 +76,7 @@
 </header>
 
 <nav>
+  <button onclick="showSection('purchases')">المشتريات</button>
   <button class="active" onclick="showSection('dashboard')">الرئيسية</button>
   <button onclick="showSection('products')">الأصناف</button>
   <button onclick="showSection('sales')">المبيعات</button>
@@ -125,7 +126,31 @@
 <button onclick="printInvoice()">🖨️ طباعة الفاتورة</button>
   <button class="primary" onclick="saveInvoice()">💾 حفظ الفاتورة</button>
 </div>
+<div id="purchases" class="box" style="display:none;">
+  <h3>🧾 فاتورة شراء</h3>
 
+  <label>الصنف</label>
+  <select id="purchaseProduct"></select>
+
+  <label>أو إضافة صنف جديد</label>
+  <input id="newProductName" placeholder="اسم الصنف الجديد">
+
+  <label>سعر الشراء</label>
+  <input type="number" id="purchasePrice">
+
+  <label>الكمية</label>
+  <input type="number" id="purchaseQty" value="1">
+
+  <button class="primary" onclick="addPurchase()">➕ إضافة</button>
+
+  <hr>
+  <div id="purchaseItems"></div>
+
+  <hr>
+  <p>إجمالي الفاتورة: <b id="purchaseTotal">0</b></p>
+
+  <button class="primary" onclick="savePurchase()">💾 حفظ فاتورة الشراء</button>
+</div>
   <!-- التقارير -->
   <div id="reports" class="box" style="display:none;">
   <h3>📊 التقارير</h3>
