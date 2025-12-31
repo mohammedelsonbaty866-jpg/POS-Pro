@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>برنامج محاسبي شامل</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="manifest" href="manifest.json">
 
 <style>
@@ -22,8 +21,8 @@ hr{margin:15px 0}
 /* Splash */
 #splash{
 position:fixed;top:0;left:0;width:100%;height:100%;
-background:#0d6efd;display:flex;flex-direction:column;
-align-items:center;justify-content:center;z-index:9999;color:white
+background:#0d6efd;display:flex;align-items:center;
+justify-content:center;z-index:9999
 }
 #splash img{width:120px;height:120px}
 </style>
@@ -31,7 +30,6 @@ align-items:center;justify-content:center;z-index:9999;color:white
 
 <body>
 
-<!-- Splash Screen -->
 <div id="splash">
   <img src="icon-512.png">
 </div>
@@ -109,9 +107,15 @@ align-items:center;justify-content:center;z-index:9999;color:white
 <input type="date" id="fromDate">
 <label>إلى تاريخ</label>
 <input type="date" id="toDate">
+
 <button onclick="showSalesReport()">تقرير المبيعات</button>
 <button onclick="showProfitReport()">الأرباح والخسائر</button>
 <button onclick="showStockReport()">المخزون</button>
+
+<hr>
+<button onclick="exportSalesExcel()">📊 تصدير Excel</button>
+<button onclick="exportSalesPDF()">📄 تصدير PDF</button>
+
 <div id="reportResult"></div>
 </div>
 
@@ -234,7 +238,7 @@ let total=0;reportResult.innerHTML='';
 sales.forEach(s=>{
 if(isBetween(s.date,fromDate.value,toDate.value)){
 total+=s.total;
-reportResult.innerHTML+=`<div>${s.total}</div>`;
+reportResult.innerHTML+=`<div>فاتورة ${s.id} : ${s.total}</div>`;
 }});
 reportResult.innerHTML+=`<h3>الإجمالي ${total}</h3>`;
 }
@@ -249,6 +253,32 @@ reportResult.innerHTML=`<h3>صافي الربح: ${s-e}</h3>`;
 function showStockReport(){
 reportResult.innerHTML='';
 products.forEach(p=>reportResult.innerHTML+=`<div>${p.name} : ${p.qty}</div>`);
+}
+
+/* Excel */
+function exportSalesExcel(){
+let csv="رقم الفاتورة,التاريخ,الإجمالي\n";
+sales.forEach(s=>{
+if(isBetween(s.date,fromDate.value,toDate.value)){
+csv+=`${s.id},${new Date(s.date).toLocaleDateString('ar-EG')},${s.total}\n`;
+}});
+let blob=new Blob([csv],{type:"text/csv"});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="sales_report.csv";
+a.click();
+}
+
+/* PDF */
+function exportSalesPDF(){
+let html="<h2>تقرير المبيعات</h2><hr>";
+sales.forEach(s=>{
+if(isBetween(s.date,fromDate.value,toDate.value)){
+html+=`<p>فاتورة ${s.id}<br>الإجمالي: ${s.total}</p><hr>`;
+}});
+let w=window.open("");
+w.document.write(html);
+w.print();
 }
 
 function saveSettings(){
