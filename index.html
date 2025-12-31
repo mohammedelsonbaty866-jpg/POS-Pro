@@ -201,6 +201,86 @@
 
   renderProducts();
 </script>
+<script>
+  let invoice = [];
+  let sales = JSON.parse(localStorage.getItem('sales') || '[]');
+  let settings = JSON.parse(localStorage.getItem('settings') || '{}');
 
+  function loadProductsToSales() {
+    saleProduct.innerHTML = '';
+    products.forEach((p, i) => {
+      saleProduct.innerHTML += `<option value="${i}">${p.name} - ${p.price}</option>`;
+    });
+  }
+
+  function addToInvoice() {
+    const index = saleProduct.value;
+    const qty = parseInt(saleQty.value);
+
+    if (!products[index] || qty <= 0) return;
+
+    const product = products[index];
+
+    invoice.push({
+      name: product.name,
+      price: Number(product.price),
+      qty,
+      total: product.price * qty
+    });
+
+    renderInvoice();
+  }
+
+  function renderInvoice() {
+    invoiceItems.innerHTML = '';
+    let subtotal = 0;
+
+    invoice.forEach(item => {
+      subtotal += item.total;
+      invoiceItems.innerHTML += `
+        <div class="box">
+          ${item.name} × ${item.qty} = ${item.total}
+        </div>
+      `;
+    });
+
+    subTotal.innerText = subtotal.toFixed(2);
+
+    let tax = 0;
+    if (settings.taxEnabled) {
+      tax = subtotal * (settings.taxRate / 100);
+      taxRow.style.display = 'block';
+      taxAmount.innerText = tax.toFixed(2);
+    } else {
+      taxRow.style.display = 'none';
+    }
+
+    grandTotal.innerText = (subtotal + tax).toFixed(2);
+  }
+
+  function saveInvoice() {
+    if (invoice.length === 0) {
+      alert('الفاتورة فارغة');
+      return;
+    }
+
+    const data = {
+      id: Date.now(),
+      items: invoice,
+      total: grandTotal.innerText,
+      date: new Date().toLocaleString('ar-EG')
+    };
+
+    sales.push(data);
+    localStorage.setItem('sales', JSON.stringify(sales));
+
+    invoice = [];
+    renderInvoice();
+
+    alert('تم حفظ الفاتورة ✅');
+  }
+
+  loadProductsToSales();
+</script>
 </body>
 </html>
