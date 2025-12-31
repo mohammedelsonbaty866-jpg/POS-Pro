@@ -352,19 +352,28 @@ function showSalesReport() {
 
   reportResult.innerHTML += `<h3>إجمالي المبيعات: ${total}</h3>`;
 }
-
+<script>
 function showProfitReport() {
-  let profit = 0;
-  reportResult.innerHTML = '<h4>الأرباح والخسائر</h4>';
+  let salesTotal = 0;
+  let expensesTotal = 0;
 
   sales.forEach(s => {
-    s.items.forEach(i => {
-      profit += i.total;
-    });
+    salesTotal += Number(s.total);
   });
 
-  reportResult.innerHTML += `<h3>الربح التقريبي: ${profit}</h3>`;
+  expenses.forEach(e => {
+    expensesTotal += Number(e.amount);
+  });
+
+  reportResult.innerHTML = `
+    <h4>الأرباح والخسائر</h4>
+    <p>إجمالي المبيعات: ${salesTotal}</p>
+    <p>إجمالي المصروفات: ${expensesTotal}</p>
+    <h3>صافي الربح: ${salesTotal - expensesTotal}</h3>
+  `;
 }
+</script>
+
 
 function showStockReport() {
   reportResult.innerHTML = '<h4>تقرير المخزون</h4>';
