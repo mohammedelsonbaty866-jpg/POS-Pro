@@ -5,21 +5,36 @@
 <title>برنامج محاسبي شامل</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<link rel="manifest" href="manifest.json">
+
 <style>
-body{font-family:Tahoma,Arial;background:#f4f6f8;margin:0}
+body{font-family:Tahoma;background:#f4f6f8;margin:0}
 header{background:#0d6efd;color:#fff;padding:15px;text-align:center;font-size:20px}
 nav{display:flex;flex-wrap:wrap;background:#fff;border-bottom:1px solid #ddd}
-nav button{flex:1;padding:10px;border:none;background:none;font-size:14px;cursor:pointer}
+nav button{flex:1;padding:10px;border:none;background:none;font-size:14px}
 nav button.active{background:#0d6efd;color:#fff}
 .container{padding:15px}
 .box{background:#fff;padding:15px;margin-bottom:10px;border-radius:5px}
-input,select,button{width:100%;padding:10px;margin-top:5px;font-size:15px}
+input,select,button{width:100%;padding:10px;margin-top:5px}
 button.primary{background:#0d6efd;color:#fff;border:none}
 hr{margin:15px 0}
+
+/* Splash */
+#splash{
+position:fixed;top:0;left:0;width:100%;height:100%;
+background:#0d6efd;display:flex;flex-direction:column;
+align-items:center;justify-content:center;z-index:9999;color:white
+}
+#splash img{width:120px;height:120px}
 </style>
 </head>
 
 <body>
+
+<!-- Splash Screen -->
+<div id="splash">
+  <img src="icon-512.png">
+</div>
 
 <header>📊 برنامج محاسبي شامل</header>
 
@@ -37,7 +52,7 @@ hr{margin:15px 0}
 
 <div id="dashboard" class="box">
 <h3>مرحبًا 👋</h3>
-<p>برنامج محاسبي يعمل أوفلاين لأي نشاط</p>
+<p>برنامج محاسبي يعمل بدون إنترنت</p>
 </div>
 
 <div id="products" class="box" style="display:none">
@@ -52,11 +67,10 @@ hr{margin:15px 0}
 <div id="sales" class="box" style="display:none">
 <h3>🧾 فاتورة بيع</h3>
 <select id="saleProduct"></select>
-<input type="number" id="saleQty" value="1" min="1">
+<input type="number" id="saleQty" value="1">
 <button class="primary" onclick="addToInvoice()">➕ إضافة</button>
 <hr>
 <div id="invoiceItems"></div>
-<hr>
 <p>الإجمالي: <b id="subTotal">0</b></p>
 <p id="taxRow" style="display:none">الضريبة: <b id="taxAmount">0</b></p>
 <p>الإجمالي النهائي: <b id="grandTotal">0</b></p>
@@ -67,7 +81,7 @@ hr{margin:15px 0}
 <div id="purchases" class="box" style="display:none">
 <h3>🧾 فاتورة شراء</h3>
 <select id="purchaseProduct"></select>
-<input id="newProductName" placeholder="اسم صنف جديد (اختياري)">
+<input id="newProductName" placeholder="اسم صنف جديد">
 <input id="purchasePrice" type="number" placeholder="سعر الشراء">
 <input id="purchaseQty" type="number" value="1">
 <button class="primary" onclick="addPurchase()">➕ إضافة</button>
@@ -80,21 +94,21 @@ hr{margin:15px 0}
 <div id="expenses" class="box" style="display:none">
 <h3>💸 المصروفات</h3>
 <select id="expenseType">
-<option>إيجار</option>
-<option>كهرباء</option>
-<option>مياه</option>
-<option>رواتب</option>
-<option>أخرى</option>
+<option>إيجار</option><option>كهرباء</option>
+<option>مياه</option><option>رواتب</option><option>أخرى</option>
 </select>
 <input id="expenseDesc" placeholder="الوصف">
 <input id="expenseAmount" type="number" placeholder="المبلغ">
 <button class="primary" onclick="addExpense()">➕ إضافة</button>
-<hr>
 <div id="expenseList"></div>
 </div>
 
 <div id="reports" class="box" style="display:none">
 <h3>📊 التقارير</h3>
+<label>من تاريخ</label>
+<input type="date" id="fromDate">
+<label>إلى تاريخ</label>
+<input type="date" id="toDate">
 <button onclick="showSalesReport()">تقرير المبيعات</button>
 <button onclick="showProfitReport()">الأرباح والخسائر</button>
 <button onclick="showStockReport()">المخزون</button>
@@ -114,32 +128,33 @@ hr{margin:15px 0}
 </div>
 
 <script>
-function showSection(id,btn){
-document.querySelectorAll('.box').forEach(d=>d.style.display='none');
+setTimeout(()=>splash.style.display="none",1500);
+
+function showSection(id,b){
+document.querySelectorAll('.box').forEach(x=>x.style.display='none');
 document.getElementById(id).style.display='block';
-document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-btn.classList.add('active');
+document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+b.classList.add('active');
 }
 
 let products=JSON.parse(localStorage.getItem('products')||'[]');
 let sales=JSON.parse(localStorage.getItem('sales')||'[]');
-let purchases=JSON.parse(localStorage.getItem('purchases')||'[]');
 let expenses=JSON.parse(localStorage.getItem('expenses')||'[]');
 let settings=JSON.parse(localStorage.getItem('settings')||'{}');
+let invoice=[];
 
 function addProduct(){
 products.push({name:productName.value,price:+productPrice.value,qty:+productQty.value});
 localStorage.setItem('products',JSON.stringify(products));
-productName.value=productPrice.value=productQty.value='';
 renderProducts();loadProducts();
+productName.value=productPrice.value=productQty.value='';
 }
 
 function renderProducts(){
 productList.innerHTML='';
-products.forEach(p=>productList.innerHTML+=`<div>${p.name} | ${p.price} | الكمية ${p.qty}</div>`);
+products.forEach(p=>productList.innerHTML+=`<div>${p.name} | ${p.price} | ${p.qty}</div>`);
 }
 
-let invoice=[];
 function loadProducts(){
 saleProduct.innerHTML=purchaseProduct.innerHTML='';
 products.forEach((p,i)=>{
@@ -156,11 +171,10 @@ renderInvoice();
 }
 
 function renderInvoice(){
-let s=0;
-invoiceItems.innerHTML='';
-invoice.forEach(i=>{s+=i.total;invoiceItems.innerHTML+=`<div>${i.name} × ${i.qty} = ${i.total}</div>`});
+let s=0;invoiceItems.innerHTML='';
+invoice.forEach(i=>{s+=i.total;invoiceItems.innerHTML+=`<div>${i.name} × ${i.qty}</div>`});
 subTotal.innerText=s;
-let tax=settings.taxEnabled? s*(settings.taxRate/100):0;
+let tax=settings.taxEnabled?s*(settings.taxRate/100):0;
 taxRow.style.display=settings.taxEnabled?'block':'none';
 taxAmount.innerText=tax;
 grandTotal.innerText=s+tax;
@@ -168,7 +182,7 @@ grandTotal.innerText=s+tax;
 
 function saveInvoice(){
 invoice.forEach(i=>products.find(p=>p.name==i.name).qty-=i.qty);
-sales.push({id:Date.now(),total:+grandTotal.innerText,date:new Date().toLocaleString('ar-EG')});
+sales.push({id:Date.now(),total:+grandTotal.innerText,date:new Date().toISOString()});
 localStorage.setItem('sales',JSON.stringify(sales));
 localStorage.setItem('products',JSON.stringify(products));
 invoice=[];renderInvoice();renderProducts();
@@ -185,7 +199,7 @@ renderPurchase();
 
 function renderPurchase(){
 let t=0;purchaseItems.innerHTML='';
-purchaseInvoice.forEach(i=>{t+=i.price*i.qty;purchaseItems.innerHTML+=`<div>${i.name} × ${i.qty}</div>`});
+purchaseInvoice.forEach(i=>{t+=i.price*i.qty;purchaseItems.innerHTML+=`<div>${i.name}</div>`});
 purchaseTotal.innerText=t;
 }
 
@@ -200,10 +214,9 @@ alert('تم حفظ المشتريات');
 }
 
 function addExpense(){
-expenses.push({type:expenseType.value,desc:expenseDesc.value,amount:+expenseAmount.value});
+expenses.push({type:expenseType.value,amount:+expenseAmount.value,date:new Date().toISOString()});
 localStorage.setItem('expenses',JSON.stringify(expenses));
-expenseDesc.value=expenseAmount.value='';
-renderExpenses();
+renderExpenses();expenseAmount.value='';
 }
 
 function renderExpenses(){
@@ -211,14 +224,25 @@ expenseList.innerHTML='';
 expenses.forEach(e=>expenseList.innerHTML+=`<div>${e.type} - ${e.amount}</div>`);
 }
 
+function isBetween(d,f,t){
+d=new Date(d);if(f&&d<new Date(f))return false;
+if(t&&d>new Date(t))return false;return true;
+}
+
 function showSalesReport(){
-reportResult.innerHTML='';
-sales.forEach(s=>reportResult.innerHTML+=`<div>فاتورة ${s.id} : ${s.total}</div>`);
+let total=0;reportResult.innerHTML='';
+sales.forEach(s=>{
+if(isBetween(s.date,fromDate.value,toDate.value)){
+total+=s.total;
+reportResult.innerHTML+=`<div>${s.total}</div>`;
+}});
+reportResult.innerHTML+=`<h3>الإجمالي ${total}</h3>`;
 }
 
 function showProfitReport(){
-let s=sales.reduce((a,b)=>a+b.total,0);
-let e=expenses.reduce((a,b)=>a+b.amount,0);
+let s=0,e=0;
+sales.forEach(x=>{if(isBetween(x.date,fromDate.value,toDate.value))s+=x.total});
+expenses.forEach(x=>{if(isBetween(x.date,fromDate.value,toDate.value))e+=x.amount});
 reportResult.innerHTML=`<h3>صافي الربح: ${s-e}</h3>`;
 }
 
@@ -235,14 +259,12 @@ alert('تم حفظ الإعدادات');
 
 renderProducts();renderExpenses();loadProducts();
 </script>
+
 <script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js")
-      .then(() => console.log("PWA جاهز ✅"))
-      .catch(err => console.log("Service Worker Error", err));
-  });
+if("serviceWorker"in navigator){
+navigator.serviceWorker.register("service-worker.js");
 }
 </script>
+
 </body>
 </html>
