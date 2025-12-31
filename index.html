@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>برنامج محاسبي شامل</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="manifest" href="manifest.json">
+  
+  <style>
+    body {
+      font-family: Tahoma, Arial;
+      background: #f4f6f8;
+      margin: 0;
+    }
+
+    header {
+      background: #0d6efd;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 20px;
+    }
+
+    nav {
+      display: flex;
+      background: #ffffff;
+      border-bottom: 1px solid #ddd;
+    }
+
+    nav button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    nav button.active {
+      background: #0d6efd;
+      color: white;
+    }
+
+    .container {
+      padding: 15px;
+    }
+
+    .box {
+      background: white;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      font-size: 16px;
+    }
+
+    button.primary {
+      background: #0d6efd;
+      color: white;
+      border: none;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  📊 برنامج محاسبي شامل
+</header>
+
+<nav>
+  <button class="active" onclick="showSection('dashboard')">الرئيسية</button>
+  <button onclick="showSection('products')">الأصناف</button>
+  <button onclick="showSection('sales')">المبيعات</button>
+  <button onclick="showSection('reports')">التقارير</button>
+  <button onclick="showSection('settings')">الإعدادات</button>
+</nav>
+
+<div class="container">
+
+  <!-- الرئيسية -->
+  <div id="dashboard" class="box">
+    <h3>مرحبًا 👋</h3>
+    <p>اختر قسم من الأعلى لبدء العمل.</p>
+  </div>
+
+  <!-- الأصناف -->
+  <div id="products" class="box" style="display:none;">
+    <h3>إدارة الأصناف</h3>
+    <input id="productName" placeholder="اسم الصنف">
+    <input id="productPrice" type="number" placeholder="سعر البيع">
+    <input id="productQty" type="number" placeholder="الكمية">
+    <button class="primary" onclick="addProduct()">➕ إضافة صنف</button>
+    <div id="productList"></div>
+  </div>
+
+  <!-- المبيعات -->
+  <div id="sales" class="box" style="display:none;">
+    <h3>المبيعات</h3>
+    <p>قريبًا…</p>
+  </div>
+
+  <!-- التقارير -->
+  <div id="reports" class="box" style="display:none;">
+    <h3>التقارير</h3>
+    <p>قريبًا…</p>
+  </div>
+
+  <!-- الإعدادات -->
+  <div id="settings" class="box" style="display:none;">
+    <h3>الإعدادات</h3>
+
+    <label>
+      تفعيل الضريبة
+      <select id="taxEnabled">
+        <option value="false">لا</option>
+        <option value="true">نعم</option>
+      </select>
+    </label>
+
+    <input id="taxRate" type="number" placeholder="نسبة الضريبة %" />
+
+    <button class="primary" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+  </div>
+
+</div>
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll('.box').forEach(div => div.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+
+    document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  let products = JSON.parse(localStorage.getItem('products') || '[]');
+
+  function addProduct() {
+    const name = productName.value;
+    const price = productPrice.value;
+    const qty = productQty.value;
+
+    if (!name || !price || !qty) {
+      alert('من فضلك أدخل كل البيانات');
+      return;
+    }
+
+    products.push({ name, price, qty });
+    localStorage.setItem('products', JSON.stringify(products));
+    productName.value = productPrice.value = productQty.value = '';
+    renderProducts();
+  }
+
+  function renderProducts() {
+    productList.innerHTML = '';
+    products.forEach((p, i) => {
+      productList.innerHTML += `
+        <div class="box">
+          <b>${p.name}</b><br>
+          السعر: ${p.price} | الكمية: ${p.qty}
+        </div>
+      `;
+    });
+  }
+
+  function saveSettings() {
+    const settings = {
+      taxEnabled: taxEnabled.value === 'true',
+      taxRate: taxRate.value
+    };
+    localStorage.setItem('settings', JSON.stringify(settings));
+    alert('تم حفظ الإعدادات ✅');
+  }
+
+  renderProducts();
+</script>
+
+</body>
+</html>
