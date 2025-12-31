@@ -378,6 +378,108 @@ function printInvoice() {
   w.print();
 }
 </script>
+  <script>
+let purchases = JSON.parse(localStorage.getItem('purchases') || '[]');
+let purchaseInvoice = [];
+
+function loadProductsToPurchases() {
+  purchaseProduct.innerHTML = '<option value="">-- اختر صنف --</option>';
+  products.forEach((p, i) => {
+    purchaseProduct.innerHTML += `<option value="${i}">${p.name}</option>`;
+  });
+}
+
+function addPurchase() {
+  const existingIndex = purchaseProduct.value;
+  const newName = newProductName.value.trim();
+  const price = Number(purchasePrice.value);
+  const qty = Number(purchaseQty.value);
+
+  if ((!existingIndex && !newName) || price <= 0 || qty <= 0) {
+    alert('أدخل البيانات بشكل صحيح');
+    return;
+  }
+
+  let name = newName;
+  let product;
+
+  if (existingIndex !== '') {
+    product = products[existingIndex];
+    name = product.name;
+  }
+
+  purchaseInvoice.push({
+    name,
+    price,
+    qty,
+    total: price * qty
+  });
+
+  renderPurchaseInvoice();
+
+  newProductName.value = '';
+  purchasePrice.value = '';
+  purchaseQty.value = 1;
+}
+
+function renderPurchaseInvoice() {
+  purchaseItems.innerHTML = '';
+  let total = 0;
+
+  purchaseInvoice.forEach(i => {
+    total += i.total;
+    purchaseItems.innerHTML += `
+      <div class="box">
+        ${i.name} × ${i.qty} = ${i.total}
+      </div>
+    `;
+  });
+
+  purchaseTotal.innerText = total.toFixed(2);
+}
+
+function savePurchase() {
+  if (purchaseInvoice.length === 0) {
+    alert('فاتورة الشراء فارغة');
+    return;
+  }
+
+  // تحديث المخزون
+  purchaseInvoice.forEach(item => {
+    let product = products.find(p => p.name === item.name);
+
+    if (product) {
+      product.qty += item.qty;
+      product.price = item.price; // آخر سعر شراء
+    } else {
+      products.push({
+        name: item.name,
+        price: item.price,
+        qty: item.qty
+      });
+    }
+  });
+
+  localStorage.setItem('products', JSON.stringify(products));
+
+  purchases.push({
+    id: Date.now(),
+    items: purchaseInvoice,
+    total: purchaseTotal.innerText,
+    date: new Date().toLocaleString('ar-EG')
+  });
+
+  localStorage.setItem('purchases', JSON.stringify(purchases));
+
+  purchaseInvoice = [];
+  renderPurchaseInvoice();
+  renderProducts();
+  loadProductsToSales();
+  loadProductsToPurchases();
+
+  alert('تم حفظ فاتورة الشراء وتحديث المخزون ✅');
+}
+</script>
 </script>
 </body>
 </html>
