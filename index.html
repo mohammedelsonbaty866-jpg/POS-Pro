@@ -2,364 +2,126 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>برنامج محاسبي شامل</title>
+<title>Pos Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 
 <style>
-body{font-family:Tahoma;background:#f4f6f8;margin:0}
-header{background:#0d6efd;color:#fff;padding:15px;text-align:center;font-size:20px}
-nav{display:flex;flex-wrap:wrap;background:#fff;border-bottom:1px solid #ddd}
-nav button{flex:1;padding:10px;border:none;background:none;font-size:14px}
-nav button.active{background:#0d6efd;color:#fff}
-.container{padding:15px}
-.box{background:#fff;padding:15px;margin-bottom:10px;border-radius:5px}
-input,select,button{width:100%;padding:10px;margin-top:5px}
-button.primary{background:#0d6efd;color:#fff;border:none}
-hr{margin:15px 0}
-
-/* Splash */
-#splash{
-position:fixed;top:0;left:0;width:100%;height:100%;
-background:#0d6efd;display:flex;align-items:center;
-justify-content:center;z-index:9999
+body{font-family:Tahoma;margin:0;background:#f4f6f8}
+header{background:#0d6efd;color:#fff;padding:15px;text-align:center}
+.box{background:#fff;margin:15px;padding:15px;border-radius:6px}
+input,button{width:100%;padding:10px;margin-top:10px}
+button{background:#0d6efd;color:#fff;border:none}
+.hidden{display:none}
+.overlay{
+ position:fixed;top:0;left:0;width:100%;height:100%;
+ background:rgba(0,0,0,.7);color:#fff;
+ display:flex;align-items:center;justify-content:center;
+ text-align:center;z-index:999
 }
-#splash img{width:120px;height:120px}
+a{color:#25d366;font-size:18px;text-decoration:none}
 </style>
 </head>
 
 <body>
 
-<div id="splash">
-  <img src="icon-512.png">
+<header>📊 Pos Pro</header>
+
+<div id="loginBox" class="box">
+<h3>تسجيل الدخول / حساب جديد</h3>
+<input id="email" type="email" placeholder="البريد الإلكتروني">
+<input id="password" type="password" placeholder="كلمة المرور">
+<button onclick="login()">دخول</button>
+<button onclick="register()">تسجيل جديد</button>
+<p id="msg"></p>
 </div>
 
-<header>📊 برنامج محاسبي شامل</header>
-
-<nav>
-<button class="active" onclick="showSection('dashboard',this)">الرئيسية</button>
-<button onclick="showSection('products',this)">الأصناف</button>
-<button onclick="showSection('sales',this)">المبيعات</button>
-<button onclick="showSection('purchases',this)">المشتريات</button>
-<button onclick="showSection('expenses',this)">المصروفات</button>
-<button onclick="showSection('reports',this)">التقارير</button>
-<button onclick="showSection('settings',this)">الإعدادات</button>
-</nav>
-
-<div class="container">
-
-<div id="dashboard" class="box">
-<h3>مرحبًا 👋</h3>
-<p>برنامج محاسبي يعمل بدون إنترنت (PWA)</p>
+<div id="app" class="hidden">
+<div class="box">
+<p id="userEmail"></p>
+<p id="subStatus"></p>
+<button onclick="logout()">تسجيل خروج</button>
 </div>
 
-<div id="products" class="box" style="display:none">
-<h3>📦 الأصناف</h3>
-<input id="productName" placeholder="اسم الصنف">
-<input id="productPrice" type="number" placeholder="سعر البيع">
-<input id="productQty" type="number" placeholder="الكمية">
-<button class="primary" onclick="addProduct()">➕ إضافة</button>
-<div id="productList"></div>
+<div class="box">
+<h3>النظام يعمل بنجاح ✅</h3>
+<p>جميع المميزات متاحة أثناء الاشتراك</p>
+</div>
 </div>
 
-<div id="sales" class="box" style="display:none">
-<h3>🧾 فاتورة بيع</h3>
-<select id="saleProduct"></select>
-<input type="number" id="saleQty" value="1">
-<button class="primary" onclick="addToInvoice()">➕ إضافة</button>
-<hr>
-<div id="invoiceItems"></div>
-<p>الإجمالي: <b id="subTotal">0</b></p>
-<p id="taxRow" style="display:none">الضريبة: <b id="taxAmount">0</b></p>
-<p>الإجمالي النهائي: <b id="grandTotal">0</b></p>
-<button onclick="printInvoice()">🖨️ طباعة</button>
-<button class="primary" onclick="saveInvoice()">💾 حفظ</button>
+<div id="expired" class="overlay hidden">
+<div>
+<h2>⛔ انتهت فترة التجربة</h2>
+<p>برجاء تجديد الاشتراك لمتابعة استخدام Pos Pro</p>
+<a href="https://wa.me/201019936233?text=مرحبًا، أرغب في تجديد الاشتراك في Pos Pro">
+📞 تواصل عبر واتساب
+</a>
+</div>
 </div>
 
-<div id="purchases" class="box" style="display:none">
-<h3>🧾 فاتورة شراء</h3>
-<select id="purchaseProduct"></select>
-<input id="newProductName" placeholder="اسم صنف جديد">
-<input id="purchasePrice" type="number" placeholder="سعر الشراء">
-<input id="purchaseQty" type="number" value="1">
-<button class="primary" onclick="addPurchase()">➕ إضافة</button>
-<hr>
-<div id="purchaseItems"></div>
-<p>الإجمالي: <b id="purchaseTotal">0</b></p>
-<button class="primary" onclick="savePurchase()">💾 حفظ</button>
-</div>
-
-<div id="expenses" class="box" style="display:none">
-<h3>💸 المصروفات</h3>
-<select id="expenseType">
-<option>إيجار</option>
-<option>كهرباء</option>
-<option>مياه</option>
-<option>رواتب</option>
-<option>أخرى</option>
-</select>
-<input id="expenseDesc" placeholder="الوصف">
-<input id="expenseAmount" type="number" placeholder="المبلغ">
-<button class="primary" onclick="addExpense()">➕ إضافة</button>
-<div id="expenseList"></div>
-</div>
-
-<div id="reports" class="box" style="display:none">
-<h3>📊 التقارير</h3>
-<input type="date" id="fromDate">
-<input type="date" id="toDate">
-<button onclick="showSalesReport()">تقرير المبيعات</button>
-<button onclick="showProfitReport()">الأرباح والخسائر</button>
-<button onclick="showStockReport()">المخزون</button>
-<hr>
-<button onclick="exportSalesExcel()">📊 تصدير Excel</button>
-<button onclick="exportSalesPDF()">📄 تصدير PDF</button>
-<div id="reportResult"></div>
-</div>
-
-<div id="settings" class="box" style="display:none">
-<h3>⚙️ الإعدادات</h3>
-<select id="taxEnabled">
-<option value="false">بدون ضريبة</option>
-<option value="true">تفعيل الضريبة</option>
-</select>
-<input id="taxRate" type="number" placeholder="نسبة الضريبة %">
-<button class="primary" onclick="saveSettings()">💾 حفظ</button>
-<hr>
-<button onclick="backupData()">📦 نسخة احتياطية</button>
-<input type="file" onchange="restoreData(event)">
-</div>
-
-</div>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
-setTimeout(()=>splash.style.display="none",1500);
-
-function showSection(id,b){
-document.querySelectorAll('.box').forEach(x=>x.style.display='none');
-document.getElementById(id).style.display='block';
-document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
-b.classList.add('active');
-}
-
-/* ====== DATA ====== */
-let products = JSON.parse(localStorage.getItem('products')||'[]');
-let sales = JSON.parse(localStorage.getItem('sales')||'[]');
-let expenses = JSON.parse(localStorage.getItem('expenses')||'[]');
-let settings = JSON.parse(localStorage.getItem('settings')||'{}');
-let invoice=[];
-
-/* إعدادات افتراضية */
-settings={
-taxEnabled:settings.taxEnabled ?? false,
-taxRate:settings.taxRate ?? 0
+const firebaseConfig = {
+ apiKey: "AIzaSyBZwWxWIIE0exAPoL9P8pbmp19gnBFxQq0",
+ authDomain: "pos-pro-996f0.firebaseapp.com",
+ projectId: "pos-pro-996f0"
 };
-taxEnabled.value=settings.taxEnabled.toString();
-taxRate.value=settings.taxRate;
 
-/* الأصناف */
-function addProduct(){
-if(!productName.value||productPrice.value<=0||productQty.value<=0)return;
-products.push({name:productName.value,price:+productPrice.value,qty:+productQty.value});
-localStorage.setItem('products',JSON.stringify(products));
-renderProducts();loadProducts();
-productName.value=productPrice.value=productQty.value='';
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+function register(){
+ auth.createUserWithEmailAndPassword(email.value,password.value)
+ .then(r=>{
+  const end=new Date();
+  end.setDate(end.getDate()+14);
+  return db.collection("users").doc(r.user.uid).set({
+   email:r.user.email,
+   subscription:"trial",
+   trialEndsAt:end
+  });
+ })
+ .catch(e=>msg.innerText=e.message);
 }
 
-function renderProducts(){
-productList.innerHTML='';
-products.forEach(p=>productList.innerHTML+=`<div>${p.name} | ${p.price} | ${p.qty}</div>`);
+function login(){
+ auth.signInWithEmailAndPassword(email.value,password.value)
+ .catch(e=>msg.innerText=e.message);
 }
 
-function loadProducts(){
-saleProduct.innerHTML=purchaseProduct.innerHTML='';
-products.forEach((p,i)=>{
-saleProduct.innerHTML+=`<option value="${i}">${p.name}</option>`;
-purchaseProduct.innerHTML+=`<option value="${i}">${p.name}</option>`;
+function logout(){auth.signOut();}
+
+auth.onAuthStateChanged(u=>{
+ if(!u){
+  loginBox.classList.remove("hidden");
+  app.classList.add("hidden");
+  return;
+ }
+
+ loginBox.classList.add("hidden");
+ app.classList.remove("hidden");
+ userEmail.innerText="👤 "+u.email;
+
+ db.collection("users").doc(u.uid).get().then(s=>{
+  const d=s.data();
+  const now=new Date();
+  if(d.subscription==="active" || d.trialEndsAt.toDate()>now){
+   subStatus.innerText="🟢 الاشتراك نشط";
+  }else{
+   expired.classList.remove("hidden");
+  }
+ });
 });
-}
-
-/* المبيعات */
-function addToInvoice(){
-let p=products[saleProduct.value];
-let q=+saleQty.value;
-if(!p||q<=0||p.qty<q){alert("كمية غير متاحة");return;}
-invoice.push({name:p.name,qty:q,total:p.price*q});
-renderInvoice();
-}
-
-function renderInvoice(){
-let s=0;invoiceItems.innerHTML='';
-invoice.forEach(i=>{s+=i.total;invoiceItems.innerHTML+=`<div>${i.name} × ${i.qty}</div>`});
-subTotal.innerText=s.toFixed(2);
-let tax=settings.taxEnabled?s*(settings.taxRate/100):0;
-taxRow.style.display=settings.taxEnabled?'block':'none';
-taxAmount.innerText=tax.toFixed(2);
-grandTotal.innerText=(s+tax).toFixed(2);
-}
-
-function saveInvoice(){
-for(let i of invoice){
-let p=products.find(x=>x.name===i.name);
-if(!p||p.qty<i.qty){alert("خطأ في المخزون");return;}
-p.qty-=i.qty;
-}
-sales.push({id:Date.now(),total:+grandTotal.innerText,date:new Date().toISOString()});
-localStorage.setItem('sales',JSON.stringify(sales));
-localStorage.setItem('products',JSON.stringify(products));
-invoice=[];renderInvoice();renderProducts();
-subTotal.innerText=taxAmount.innerText=grandTotal.innerText="0";
-alert("تم حفظ الفاتورة ✅");
-}
-
-function printInvoice(){window.print();}
-
-/* المشتريات */
-let purchaseInvoice=[];
-function addPurchase(){
-if(purchasePrice.value<=0||purchaseQty.value<=0)return;
-purchaseInvoice.push({
-name:newProductName.value||products[purchaseProduct.value]?.name,
-price:+purchasePrice.value,
-qty:+purchaseQty.value
-});
-renderPurchase();
-}
-
-function renderPurchase(){
-let t=0;purchaseItems.innerHTML='';
-purchaseInvoice.forEach(i=>{t+=i.price*i.qty;purchaseItems.innerHTML+=`<div>${i.name}</div>`});
-purchaseTotal.innerText=t.toFixed(2);
-}
-
-function savePurchase(){
-purchaseInvoice.forEach(i=>{
-let p=products.find(x=>x.name===i.name);
-p?p.qty+=i.qty:products.push({name:i.name,price:i.price,qty:i.qty});
-});
-localStorage.setItem('products',JSON.stringify(products));
-purchaseInvoice=[];renderPurchase();renderProducts();loadProducts();
-alert("تم حفظ المشتريات ✅");
-}
-
-/* المصروفات */
-function addExpense(){
-if(expenseAmount.value<=0)return;
-expenses.push({
-type:expenseType.value,
-desc:expenseDesc.value,
-amount:+expenseAmount.value,
-date:new Date().toISOString()
-});
-localStorage.setItem('expenses',JSON.stringify(expenses));
-expenseDesc.value=expenseAmount.value='';
-renderExpenses();
-}
-
-function renderExpenses(){
-expenseList.innerHTML='';
-expenses.forEach(e=>expenseList.innerHTML+=`<div>${e.type} - ${e.desc||''} : ${e.amount}</div>`);
-}
-
-/* التقارير */
-function isBetween(d,f,t){
-d=new Date(d);
-if(f&&d<new Date(f))return false;
-if(t&&d>new Date(t))return false;
-return true;
-}
-
-function showSalesReport(){
-let total=0;reportResult.innerHTML='';
-sales.forEach(s=>{
-if(isBetween(s.date,fromDate.value,toDate.value)){
-total+=s.total;
-reportResult.innerHTML+=`<div>فاتورة ${s.id} : ${s.total}</div>`;
-}});
-reportResult.innerHTML+=`<h3>الإجمالي ${total}</h3>`;
-}
-
-function showProfitReport(){
-let s=0,e=0;
-sales.forEach(x=>{if(isBetween(x.date,fromDate.value,toDate.value))s+=x.total});
-expenses.forEach(x=>{if(isBetween(x.date,fromDate.value,toDate.value))e+=x.amount});
-reportResult.innerHTML=`<h3>صافي الدخل: ${s-e}</h3><small>⚠ لا يشمل تكلفة البضاعة</small>`;
-}
-
-function showStockReport(){
-reportResult.innerHTML='';
-products.forEach(p=>reportResult.innerHTML+=`<div>${p.name} : ${p.qty}</div>`);
-}
-
-/* Excel */
-function exportSalesExcel(){
-let csv="رقم الفاتورة,التاريخ,الإجمالي\n";
-sales.forEach(s=>{
-if(isBetween(s.date,fromDate.value,toDate.value)){
-csv+=`${s.id},${new Date(s.date).toLocaleDateString('ar-EG')},${s.total}\n`;
-}});
-let blob=new Blob([csv],{type:"text/csv"});
-let a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="sales_report.csv";
-a.click();
-}
-
-/* PDF */
-function exportSalesPDF(){
-let html="<h2>تقرير المبيعات</h2><hr>";
-sales.forEach(s=>{
-if(isBetween(s.date,fromDate.value,toDate.value)){
-html+=`<p>فاتورة ${s.id}<br>الإجمالي: ${s.total}</p><hr>`;
-}});
-let w=window.open("");
-w.document.write(html);
-w.print();
-}
-
-/* إعدادات */
-function saveSettings(){
-settings={taxEnabled:taxEnabled.value==='true',taxRate:+taxRate.value};
-localStorage.setItem('settings',JSON.stringify(settings));
-alert("تم حفظ الإعدادات ✅");
-}
-
-/* Backup */
-function backupData(){
-const data={products,sales,expenses,settings};
-const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-const a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="backup_accounting.json";
-a.click();
-}
-
-function restoreData(e){
-const file=e.target.files[0];
-if(!file)return;
-const r=new FileReader();
-r.onload=x=>{
-const d=JSON.parse(x.target.result);
-products=d.products||[];
-sales=d.sales||[];
-expenses=d.expenses||[];
-settings=d.settings||settings;
-localStorage.setItem("products",JSON.stringify(products));
-localStorage.setItem("sales",JSON.stringify(sales));
-localStorage.setItem("expenses",JSON.stringify(expenses));
-localStorage.setItem("settings",JSON.stringify(settings));
-renderProducts();renderExpenses();loadProducts();
-alert("تم استرجاع البيانات بنجاح ✅");
-};
-r.readAsText(file);
-}
-
-renderProducts();renderExpenses();loadProducts();
 </script>
 
 <script>
 if("serviceWorker" in navigator){
-navigator.serviceWorker.register("service-worker.js");
+ navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 
