@@ -81,6 +81,7 @@
   <button onclick="showSection('products')">الأصناف</button>
   <button onclick="showSection('sales')">المبيعات</button>
   <button onclick="showSection('reports')">التقارير</button>
+  <button onclick="showSection('expenses')">المصروفات</button>
   <button onclick="showSection('settings')">الإعدادات</button>
 </nav>
 
@@ -219,6 +220,29 @@
       `;
     });
   }
+  <div id="expenses" class="box" style="display:none;">
+  <h3>💸 المصروفات</h3>
+
+  <label>نوع المصروف</label>
+  <select id="expenseType">
+    <option>إيجار</option>
+    <option>كهرباء</option>
+    <option>مياه</option>
+    <option>رواتب</option>
+    <option>أخرى</option>
+  </select>
+
+  <label>الوصف</label>
+  <input id="expenseDesc" placeholder="وصف المصروف">
+
+  <label>المبلغ</label>
+  <input type="number" id="expenseAmount">
+
+  <button class="primary" onclick="addExpense()">➕ إضافة مصروف</button>
+
+  <hr>
+  <div id="expenseList"></div>
+</div>
 
   function saveSettings() {
     const settings = {
